@@ -1,84 +1,86 @@
-import { Link } from "react-router-dom";
-import crmImage from "../assets/crm-signup.png";
+import { useState } from "react";
+import { signup } from "../services/authService";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Signup() {
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+    role: "CUSTOMER"
+  });
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await signup(form);
+      alert("Signup successful");
+      navigate("/login");
+    } catch (err) {
+      alert("Signup failed");
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-200 via-pink-200 to-indigo-200 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-blue-100">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-8 rounded-xl w-96 shadow"
+      >
+        <h2 className="text-2xl font-bold mb-6 text-center">Signup</h2>
 
-      {/* CARD */}
-      <div className="w-full max-w-6xl bg-white rounded-[40px] shadow-2xl overflow-hidden flex flex-col lg:flex-row">
+        <input
+          name="username"
+          placeholder="Username"
+          className="input"
+          onChange={handleChange}
+          required
+        />
 
-        {/* LEFT FORM */}
-        <div className="w-full lg:w-1/2 p-10 sm:p-14 flex flex-col justify-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Create your Account
-          </h2>
+        <input
+          name="email"
+          type="email"
+          placeholder="Email"
+          className="input"
+          onChange={handleChange}
+          required
+        />
 
-          <p className="text-gray-500 mb-8 text-sm">
-            Fill in the details to get started
-          </p>
+        <input
+          name="password"
+          type="password"
+          placeholder="Password"
+          className="input"
+          onChange={handleChange}
+          required
+        />
 
-          {/* USERNAME */}
-          <label className="text-sm text-gray-600 mb-1">Username</label>
-          <input
-            type="text"
-            placeholder="Enter Username"
-            className="mb-5 p-4 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          />
+        <select
+          name="role"
+          className="input"
+          onChange={handleChange}
+        >
+          <option value="CUSTOMER">Customer</option>
+          <option value="EMPLOYEE">Employee</option>
+          <option value="ADMIN">Admin</option>
+        </select>
 
-          {/* EMAIL */}
-          <label className="text-sm text-gray-600 mb-1">Email</label>
-          <input
-            type="email"
-            placeholder="Enter Email"
-            className="mb-5 p-4 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          />
+        <button className="btn-primary">Signup</button>
 
-          {/* PASSWORD */}
-          <label className="text-sm text-gray-600 mb-1">Password</label>
-          <input
-            type="password"
-            placeholder="Create Password"
-            className="mb-5 p-4 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          />
-
-          {/* CONFIRM PASSWORD */}
-          <label className="text-sm text-gray-600 mb-1">Confirm Password</label>
-          <input
-            type="password"
-            placeholder="Confirm Password"
-            className="mb-6 p-4 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          />
-
-          {/* BUTTON */}
-          <button className="bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition">
-            SIGN UP
-          </button>
-
-          {/* FOOTER */}
-          <p className="text-sm text-gray-600 mt-6">
-            Already have an account?
-            <Link to="/" className="text-indigo-600 font-semibold ml-1">
-              Sign in
-            </Link>
-          </p>
-        </div>
-
-        {/* RIGHT IMAGE SECTION */}
-        <div className="relative w-full lg:w-1/2 bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center py-16 lg:py-0">
-
-          {/* BIG CURVE */}
-          <div className="absolute right-[-140px] w-[500px] h-[500px] bg-indigo-500 rounded-full opacity-40"></div>
-
-          {/* IMAGE */}
-          <img
-            src={crmImage}
-            alt="Signup Illustration"
-            className="relative w-72 sm:w-96 lg:w-[420px]"
-          />
-        </div>
-
-      </div>
+        <p className="mt-4 text-sm text-center">
+          Already have an account?{" "}
+          <Link to="/login" className="text-blue-600">Login</Link>
+        </p>
+      </form>
     </div>
   );
 }
+
+
+

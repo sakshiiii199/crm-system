@@ -1,15 +1,71 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Dashboard from "./pages/Dashboard";
+
+// dashboards
+import AdminDashboard from "./pages/dashboards/AdminDashboard";
+import EmployeeDashboard from "./pages/dashboards/EmployeeDashboard";
+import CustomerDashboard from "./pages/customers/CustomerDashboard";
+
+// customers
+import Customers from "./pages/customers/Customers";
+
+// protected route
+import ProtectedRoute from "./componentts/ProtectedRoute";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Login />} />
+
+        {/* Default redirect */}
+        <Route path="/" element={<Navigate to="/login" />} />
+
+        {/* Auth */}
+        <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+
+        {/* ADMIN */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* EMPLOYEE */}
+        <Route
+          path="/employee"
+          element={
+            <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
+              <EmployeeDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* CUSTOMER */}
+        <Route
+          path="/customer"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <CustomerDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Example protected page */}
+        <Route
+          path="/customers"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN", "EMPLOYEE"]}>
+              <Customers />
+            </ProtectedRoute>
+          }
+        />
+
       </Routes>
     </BrowserRouter>
   );
