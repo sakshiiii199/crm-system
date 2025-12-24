@@ -4,6 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
+.dashboard-container{
+  display:flex;
+  main-height:100vh;
+  width:100%;
+}
+
 .input {
   @apply w-full p-3 mb-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400;
 }
