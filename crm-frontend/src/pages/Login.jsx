@@ -21,9 +21,21 @@ export default function Login() {
     setloading(true);
     
     try {
-      const response = await login(form);
+      const res = await fetch("http://localhost:8081/api/auth/login",{
+        method: "POST",
+        headers: { "Content-Type": "application/json"},
+        body: JSON.stringify(form)
+
+      });
+      if(!res.ok) throw new Error("Login Failed");
+      const response = await res.json();
+
        localStorage.setItem("role", response.role);
-       localStorage.setItem("email", form.email);
+       localStorage.setItem("email", response.email);
+       localStorage.setItem("id", response.id);
+       localStorage.setItem("username", response.username);
+           
+
      
 
 
@@ -34,7 +46,7 @@ export default function Login() {
       if (response.role === "ADMIN") {
         navigate("/admin");
       } else if (response.role === "EMPLOYEE") {
-        navigate("/employee");
+        navigate(`/employee/${response.id}`);
       } else {
         navigate("/customer");
       }

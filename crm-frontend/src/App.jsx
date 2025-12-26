@@ -38,7 +38,7 @@ export default function App() {
 
         {/* EMPLOYEE */}
         <Route
-          path="/employee"
+          path="/employee/:id"
           element={
             <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
               <EmployeeDashboard />

@@ -9,4 +9,8 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
 
     List<Issue> findByCustomerEmail(String email);
     List<Issue> findByCustomerEmailAndStatus(String email, String status);
+    List<Issue>  findByAssignedEmployee(String assignedEmployee);
+
+    long countByAssignedEmployee(String assignedEmployee);
+    long countByAssignedEmployeeAndStatus(String assignedEmployee, String status);
 }

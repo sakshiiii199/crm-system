@@ -1,169 +1,130 @@
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 export default function AdminDashboard() {
+  const [data, setData] = useState(null);
+  const [active, setActive] = useState("overview");
+
+  useEffect(() => {
+    loadDashboard();
+  }, []);
+
+  const loadDashboard = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:8081/api/admin/dashboard", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      const result = await res.json();
+      setData(result);
+    } catch (err) {
+      console.log("ERROR:", err);
+    }
+  };
+
+  // --- ASSIGN ISSUE FUNCTION ---
+  const assignIssue = async (issueId, username) => {
+    const res= await fetch(
+      `http://localhost:8081/api/admin/assign/${issueId}/${username}`,
+      { method: "POST" }
+    );
+    alert("Issue Assigned!");
+    loadDashboard();
+  };
+
+  if (!data) return <h3 style={{ textAlign: "center" }}>Loading...</h3>;
+
   return (
-    <div className="min-h-screen flex bg-gray-100">
-
-      {/* SIDEBAR */}
-      <aside className="w-64 bg-indigo-700 text-white hidden md:flex flex-col">
-        <div className="p-6 text-2xl font-bold border-b border-indigo-500">
-          Admin Panel
-        </div>
-
-        <nav className="flex-1 p-4 space-y-2">
-          <NavItem label="Overview" />
-          <NavItem label="Issue Management" />
-          <NavItem label="Employees" />
-          <NavItem label="Customers" />
-          <NavItem label="Reports" />
-          <NavItem label="Settings" />
-        </nav>
-
-        <div className="p-4 border-t border-indigo-500">
-          <button className="w-full bg-red-500 py-2 rounded-lg hover:bg-red-600">
-            Logout
-          </button>
-        </div>
+    <div className="dashboard-container">
+      {/* Sidebar */}
+      <aside className="sidebar">
+        <h3>Admin Panel</h3>
+        <button className={active === "overview" ? "active" : ""} onClick={() => setActive("overview")}>Overview</button>
+        <button className={active === "issues" ? "active" : ""} onClick={() => setActive("issues")}>Issue Management</button>
+        <button className={active === "employees" ? "active" : ""} onClick={() => setActive("employees")}>Employees</button>
+        <button className={active === "customers" ? "active" : ""} onClick={() => setActive("customers")}>Customers</button>
+        <button className={active === "reports" ? "active" : ""} onClick={() => setActive("reports")}>Reports</button>
+        <button className={active === "settings" ? "active" : ""} onClick={() => setActive("settings")}>Settings</button>
       </aside>
 
-      {/* MAIN CONTENT */}
-      <main className="flex-1 p-6">
+      {/* Main Content */}
+      <main className="content">
+        <h2>Admin Dashboard</h2>
 
-        {/* HEADER */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-          <span className="text-gray-600">Welcome, Admin 👋</span>
+        {/* Top Cards */}
+        <div className="cards">
+          <div className="card">Total Customers<br /><b>{data.totalCustomers}</b></div>
+          <div className="card">Total Employees<br /><b>{data.totalEmployees}</b></div>
+          <div className="card">Total Issues<br /><b>{data.totalIssues}</b></div>
+          <div className="card">Resolved Issues<br /><b>{data.resolvedIssues}</b></div>
         </div>
 
-        {/* OVERVIEW STATS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Stat title="Total Customers" value="1,250" />
-          <Stat title="Total Employees" value="45" />
-          <Stat title="Total Issues" value="320" />
-          <Stat title="Resolved Issues" value="280" />
-        </div>
+        {/* ISSUE TABLE */}
+        {active === "issues" || active === "overview" ? (
+          <>
+            <h3>Issue Management</h3>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>ID</th><th>Customer</th><th>Priority</th><th>Status</th><th>Assigned To</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.issues.map((i) => (
+                  <tr key={i.id}>
+                    <td>{i.id}</td>
+                    <td>{i.customerEmail}</td>
+                    <td>{i.priority || "HIGH"}</td>
+                    <td>{i.status}</td>
+                    <td>{i.assignedEmployee || "—"}</td>
+                    <td>
+                      <select
+                        onChange={(e) => assignIssue(i.id, e.target.value)}
+                      >
+                        <option value="select">Assign</option>
+                        {data.employees
+                          .filter((e) => e.role === "EMPLOYEE")
+                          .map((e) => (
+                            <option key={e.id} value={e.username}>
+                              {e.username}
+                            </option>
+                          ))}
+                      </select>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        ) : null}
 
-        {/* ISSUE MANAGEMENT */}
-        <Section title="Issue Management">
-          <Table
-            headers={["Issue ID", "Customer", "Priority", "Status", "Assigned To"]}
-            rows={[
-              ["#101", "John", "High", "Open", "—"],
-              ["#102", "Sara", "Medium", "In Progress", "Alex"],
-              ["#103", "Mike", "Low", "Resolved", "Emma"],
-            ]}
-          />
-        </Section>
-
-        {/* EMPLOYEE MANAGEMENT */}
-        <Section title="Employee Management">
-          <Table
-            headers={["Employee", "Role", "Issues Solved", "Status"]}
-            rows={[
-              ["Alex", "Support", "120", "Active"],
-              ["Emma", "Support", "95", "Active"],
-              ["Ryan", "Tech", "60", "Inactive"],
-            ]}
-          />
-        </Section>
-
-        {/* CUSTOMER MANAGEMENT */}
-        <Section title="Customer Management">
-          <Table
-            headers={["Customer", "Email", "Issues Raised", "Status"]}
-            rows={[
-              ["John", "john@gmail.com", "5", "Active"],
-              ["Sara", "sara@gmail.com", "3", "Active"],
-              ["Mike", "mike@gmail.com", "1", "Inactive"],
-            ]}
-          />
-        </Section>
-
-        {/* REPORTS */}
-        <Section title="Reports & Analytics">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <ReportCard title="Daily Issues" value="24" />
-            <ReportCard title="Monthly Issues" value="420" />
-            <ReportCard title="Top Employee" value="Alex" />
-          </div>
-        </Section>
-
-        {/* SETTINGS */}
-        <Section title="System Settings">
-          <div className="flex flex-wrap gap-4">
-            <button className="btn">Change Roles</button>
-            <button className="btn">Reset Passwords</button>
-            <button className="btn">Manage Permissions</button>
-          </div>
-        </Section>
-
+        {/* EMPLOYEE TABLE */}
+        {active === "employees" || active === "overview" ? (
+          <>
+            <h3>Employee Management</h3>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Name</th><th>Role</th><th>Issues Solved</th><th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.employees.map((e) => (
+                  <tr key={e.id}>
+                    <td>{e.username}</td>
+                    <td>{e.role}</td>
+                    <td>{e.issuesSolved}</td>
+                    <td>{e.status || "Active"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        ) : null}
       </main>
-    </div>
-  );
-}
-
-/* COMPONENTS */
-
-function NavItem({ label }) {
-  return (
-    <div className="px-4 py-2 rounded-lg hover:bg-indigo-600 cursor-pointer">
-      {label}
-    </div>
-  );
-}
-
-function Stat({ title, value }) {
-  return (
-    <div className="bg-white p-6 rounded-xl shadow">
-      <p className="text-sm text-gray-500">{title}</p>
-      <h2 className="text-2xl font-bold mt-2">{value}</h2>
-    </div>
-  );
-}
-
-function Section({ title, children }) {
-  return (
-    <div className="bg-white p-6 rounded-xl shadow mb-8">
-      <h2 className="text-lg font-semibold mb-4">{title}</h2>
-      {children}
-    </div>
-  );
-}
-
-function Table({ headers, rows }) {
-  return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full border">
-        <thead className="bg-gray-100">
-          <tr>
-            {headers.map((h) => (
-              <th key={h} className="px-4 py-2 text-left text-sm font-medium">
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <tr key={i} className="border-t">
-              {row.map((cell, j) => (
-                <td key={j} className="px-4 py-2 text-sm">
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function ReportCard({ title, value }) {
-  return (
-    <div className="bg-indigo-600 text-white p-6 rounded-xl">
-      <p className="text-sm">{title}</p>
-      <h2 className="text-2xl font-bold mt-2">{value}</h2>
     </div>
   );
 }

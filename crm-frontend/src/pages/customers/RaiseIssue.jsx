@@ -6,18 +6,21 @@ export default function RaiseIssue() {
     title: "",
     description: "",
     category: "Technical",
+    priority: "MEDIUM",
     customerEmail: localStorage.getItem("email"),
   });
 
   const submit = async () => {
     alert(await raiseIssue(issue));
   };
-
+ 
+  
   return (
     <>
       <h3>Raise Issue</h3>
       <input placeholder="Title" onChange={e => setIssue({...issue, title:e.target.value})} />
       <textarea placeholder="Description" onChange={e => setIssue({...issue, description:e.target.value})} />
+      
       <button onClick={submit}>Submit</button>
     </>
   );

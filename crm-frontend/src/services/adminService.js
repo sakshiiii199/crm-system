@@ -1,16 +1,23 @@
-const API = "http://localhost:8081/api/admin";
 
-export const getAdminStats = async () => {
-  const res = await fetch(`${API}/stats`);
-  return res.json();
-};
 
-export const getEmployees = async () => {
-  const res = await fetch(`${API}/employees`);
-  return res.json();
-};
+const BASE = "http://localhost:8081/api/admin";
 
-export const getCustomers = async () => {
-  const res = await fetch(`${API}/customers`);
-  return res.json();
+export const fetchAdminSummary = () =>
+  fetch(`${BASE}/dashboard`).then((res) => res.json());
+
+export const fetchAdminIssues = () =>
+  fetch(`${BASE}/issues`).then((res) => res.json());
+
+export const fetchAdminEmployees = () =>
+  fetch(`${BASE}/employees`).then((res) => res.json());
+
+export const fetchAdminCustomers = () =>
+  fetch(`${BASE}/customers`).then((res) => res.json());
+
+
+
+export const assignIssue = async (id, email) => {
+  return fetch(`${BASE}/assign?issueId=${id}&employeeEmail=${email}`, {
+    method: "POST",
+  }).then(res => res.text());
 };
