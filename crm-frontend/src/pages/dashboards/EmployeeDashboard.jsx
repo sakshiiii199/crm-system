@@ -1,15 +1,14 @@
+import "./EmployeeDashboard.css";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 export default function EmployeeDashboard() {
-  const {id} = useParams();
+  const { id } = useParams();
   const [data, setData] = useState(null);
-  const username = localStorage.getItem("username");  // <-- SAVE DURING LOGIN
 
   const loadData = async () => {
-    const userEmail = localStorage.getItem("email");
-    
-    const res = await fetch(`http://localhost:8081/api/employee/dashboard/${userEmail}`);
+    const email = localStorage.getItem("email");
+    const res = await fetch(`http://localhost:8081/api/employee/dashboard/${email}`);
     const json = await res.json();
     setData(json);
   };
@@ -17,6 +16,13 @@ export default function EmployeeDashboard() {
   useEffect(() => {
     loadData();
   }, []);
+
+  const updateStatus = async (issueId, status) => {
+    await fetch(`http://localhost:8081/api/employee/update-status/${issueId}/${status}`, {
+      method: "POST"
+    });
+    loadData();   // refresh UI after update
+  };
 
   if (!data) return <h3 style={{ textAlign: "center" }}>Loading...</h3>;
 
@@ -50,16 +56,39 @@ export default function EmployeeDashboard() {
               <th>Priority</th>
               <th>Deadline</th>
               <th>Status</th>
+              <th>Actions</th>   {/* <-- FIXED */}
             </tr>
           </thead>
+
           <tbody>
-            {data.issues.map(i => (
+            {data.issues.map((i) => (
               <tr key={i.id}>
                 <td>{i.id}</td>
                 <td>{i.customerEmail}</td>
                 <td>{i.priority}</td>
                 <td>{i.deadline}</td>
                 <td>{i.status}</td>
+                <td>
+                  {i.status !== "Resolved" && (
+                    <button
+                    className="status-btn resolve"
+                      
+                      onClick={() => updateStatus(i.id, "Resolved")}
+                    >
+                      Resolve
+                    </button>
+                  )}
+
+                  {i.status !== "In Progress" && (
+                    <button
+                    className="status-btn progress"
+                      
+                      onClick={() => updateStatus(i.id, "In Progress")}
+                    >
+                      In-Progress
+                    </button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -74,8 +103,8 @@ export default function EmployeeDashboard() {
         {/* PROFILE */}
         <h3>Profile</h3>
         <div className="profile-card">
-          <p><b>Name:</b> {data.username}</p>
-          <p><b>Email:</b> {data.userEmail}</p>
+          <p><b>Name:</b> {data.profile.name}</p>
+          <p><b>Email:</b> {data.profile.email}</p>
         </div>
       </main>
     </div>
