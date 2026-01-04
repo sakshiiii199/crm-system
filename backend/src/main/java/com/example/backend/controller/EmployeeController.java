@@ -18,18 +18,17 @@ public class EmployeeController {
     private final IssueRepository issueRepo;
     private final UserRepository userRepo;
 
-    /** DASHBOARD DATA RETURN */
+    /** ---------------- DASHBOARD ---------------- */
     @GetMapping("/dashboard/{email}")
     public Map<String, Object> dashboard(@PathVariable String email) {
         Map<String, Object> data = new HashMap<>();
 
-        // get user by email
         User emp = userRepo.findByEmail(email).orElse(null);
         if (emp == null) return data;
 
         String username = emp.getUsername();
 
-        // Stats
+        // STATS
         long assigned = issueRepo.countByAssignedEmployee(username);
         long completed = issueRepo.countByAssignedEmployeeAndStatus(username, "Resolved");
         long pending = issueRepo.countByAssignedEmployeeAndStatus(username, "In Progress");
@@ -38,33 +37,38 @@ public class EmployeeController {
         data.put("completed", completed);
         data.put("pending", pending);
 
-        // Assigned Issue List
-        List<Issue> myIssues = issueRepo.findByAssignedEmployee(username);
-        data.put("issues", myIssues);
+        // ASSIGNED ISSUES LIST
+        List<Issue> issues = issueRepo.findByAssignedEmployee(username);
+        data.put("issues", issues);
 
-        // Notifications (static example)
-        List<String> notifications =List.of(
-            "Issue #101 assigned",
-            "Issue #99 resolved",
-            "Deadline approaching"
-        );
-        data.put("notifications",  notifications);
+        // NOTIFICATIONS (Dynamic)
+        List<String> notifs = new ArrayList<>();
+        for (Issue issue : issues) {
+            if (issue.getStatus().equals("In Progress")) {
+                notifs.add("Issue #" + issue.getId() + " is in progress.");
+            }
+            if (issue.getStatus().equals("Resolved")) {
+                notifs.add("Issue #" + issue.getId() + " has been resolved.");
+            }
+        }
+        data.put("notifications", notifs);
 
-        // Employee profile
+        // PROFILE
         Map<String, Object> profile = new HashMap<>();
         profile.put("name", emp.getUsername());
         profile.put("email", emp.getEmail());
+        profile.put("role", emp.getRole());
         data.put("profile", profile);
 
         return data;
     }
 
+    /** ---------------- UPDATE ISSUE STATUS ---------------- */
     @PostMapping("/update-status/{id}/{status}")
-public String updateStatus(@PathVariable Long id, @PathVariable String status) {
-    Issue issue = issueRepo.findById(id).orElseThrow();
-    issue.setStatus(status);
-    issueRepo.save(issue);
-    return "Status Updated";
-}
-
+    public String updateStatus(@PathVariable Long id, @PathVariable String status) {
+        Issue issue = issueRepo.findById(id).orElseThrow();
+        issue.setStatus(status);
+        issueRepo.save(issue);
+        return "Status Updated";
+    }
 }
