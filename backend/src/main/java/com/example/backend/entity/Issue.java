@@ -20,6 +20,8 @@ public class Issue {
 
     private String customerEmail;
     private String assignedEmployee;
+    private String notificationMessage;
+    private boolean seen = false;
     
     public String getStatus(){
         return status;
@@ -28,6 +30,8 @@ public class Issue {
     public void setAssignedTo(String assignedEmployee){
         this.assignedEmployee = assignedEmployee;
     }
+
+    
 
     
 

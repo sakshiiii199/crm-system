@@ -34,6 +34,7 @@ export default function Signup() {
         className="bg-white p-8 rounded-xl w-96 shadow"
       >
         <h2 className="text-2xl font-bold mb-6 text-center">Signup</h2>
+        
 
         <input
           name="username"
